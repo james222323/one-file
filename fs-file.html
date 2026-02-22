@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FUSION — Games</title>
+<link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
+:root{
+  --bg:#ECEEF5;--surface:#fff;--surface2:#F4F5FB;
+  --accent:#695CFE;--accent-light:#EAE8FF;--accent-glow:rgba(105,92,254,.25);
+  --text:#3a3b4a;--muted:#9395a5;--border:rgba(0,0,0,.07);
+  --sh-sm:0 2px 8px rgba(0,0,0,.06);--sh-md:0 8px 28px rgba(0,0,0,.11);--sh-lg:0 20px 60px rgba(105,92,254,.22);
+  --r:14px;--r-sm:8px;--ease:cubic-bezier(.4,0,.2,1)
+}
+body.dark{
+  --bg:#111215;--surface:#1c1d21;--surface2:#25262c;
+  --accent:#7b6fff;--accent-light:#1e1c35;--accent-glow:rgba(123,111,255,.2);
+  --text:#e8e9f0;--muted:#6b6d80;--border:rgba(255,255,255,.07);
+  --sh-sm:0 2px 8px rgba(0,0,0,.35);--sh-md:0 8px 28px rgba(0,0,0,.45);--sh-lg:0 20px 60px rgba(0,0,0,.55)
+}
+html{scroll-behavior:smooth}
+body{min-height:100vh;background:var(--bg);font-family:'Nunito',sans-serif;color:var(--text);transition:background .3s,color .3s;overflow-x:hidden}
+::selection{background:var(--accent);color:#fff}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--muted);border-radius:99px}
+
+/* LOADER */
+#loader{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity .4s}
+#loader.gone{opacity:0;pointer-events:none}
+.ld-logo{font-family:'Rajdhani',sans-serif;font-size:34px;font-weight:700;color:var(--accent);letter-spacing:7px}
+.ld-bar{width:160px;height:3px;background:var(--accent-light);border-radius:99px;overflow:hidden}
+.ld-fill{height:100%;background:var(--accent);border-radius:99px;animation:lf .7s var(--ease) forwards}
+@keyframes lf{from{width:0}to{width:100%}}
+
+/* TOPBAR */
+.topbar{position:sticky;top:0;z-index:300;height:56px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:12px;transition:background .3s}
+.tb-logo{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;color:var(--accent);letter-spacing:4px;white-space:nowrap}
+.tb-search{flex:1;max-width:420px;position:relative}
+.tb-search i{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:18px;pointer-events:none}
+.tb-search input{width:100%;height:38px;background:var(--surface2);border:1.5px solid transparent;border-radius:var(--r-sm);padding:0 12px 0 36px;font-size:14px;font-weight:600;color:var(--text);outline:none;font-family:inherit;transition:border-color .2s,background .2s}
+.tb-search input::placeholder{color:var(--muted)}
+.tb-search input:focus{border-color:var(--accent);background:var(--surface)}
+.tb-filter{position:relative}
+.tb-filter i{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:18px;pointer-events:none}
+.tb-filter select{height:38px;background:var(--surface2);border:1.5px solid transparent;border-radius:var(--r-sm);padding:0 12px 0 34px;font-size:13px;font-weight:700;color:var(--text);outline:none;cursor:pointer;appearance:none;font-family:inherit;transition:border-color .2s}
+.tb-filter select:focus{border-color:var(--accent)}
+.tb-right{display:flex;gap:6px;margin-left:auto}
+.icon-btn{width:36px;height:36px;background:var(--surface2);border:none;border-radius:var(--r-sm);color:var(--muted);font-size:19px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s,color .2s;position:relative}
+.icon-btn:hover{background:var(--accent);color:#fff}
+
+/* DROPDOWN */
+.dd{position:absolute;top:calc(100% + 6px);right:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh-md);min-width:180px;overflow:hidden;display:none;z-index:600}
+.dd.open{display:block}
+.dd button{display:flex;align-items:center;gap:10px;width:100%;padding:11px 16px;background:transparent;border:none;color:var(--text);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .15s}
+.dd button:hover{background:var(--accent);color:#fff}
+
+/* PAGE */
+#mainpage{min-height:100vh}
+.page-hero{padding:28px 28px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.page-title{font-family:'Rajdhani',sans-serif;font-size:34px;font-weight:700;color:var(--text);letter-spacing:1px}
+.pill{font-size:12px;font-weight:800;background:var(--accent-light);color:var(--accent);padding:4px 12px;border-radius:99px}
+.page-sub{font-size:12px;font-weight:600;color:var(--muted);margin-left:auto}
+.sec-wrap{padding:0 28px 32px}
+.sec-label{font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+
+/* FEATURED CAROUSEL */
+.feat-wrap{position:relative;display:flex;align-items:center;gap:10px}
+.feat-carousel{flex:1;overflow:hidden;border-radius:var(--r)}
+.feat-track{display:flex;transition:transform .45s var(--ease);will-change:transform;align-items:stretch}
+.feat-slide{flex-shrink:0;width:100%;position:relative;box-sizing:border-box}
+
+/* Rec card — compact horizontal layout, clearly different from GOTD */
+.rec-card{
+  width:100%;height:120px;
+  border-radius:var(--r);overflow:hidden;cursor:pointer;
+  position:relative;background:var(--surface);
+  box-shadow:var(--sh-sm);
+  display:flex;align-items:stretch;
+  border:1.5px solid var(--border);
+  transition:box-shadow .2s var(--ease),border-color .2s
+}
+.rec-card:hover{box-shadow:var(--sh-md);border-color:var(--accent)}
+.rec-card .rc-thumb{
+  width:130px;flex-shrink:0;
+  overflow:hidden;position:relative
+}
+.rec-card .rc-thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s var(--ease)}
+.rec-card:hover .rc-thumb img{transform:scale(1.06)}
+.rec-card .rc-body{
+  flex:1;padding:12px 14px;
+  display:flex;flex-direction:column;justify-content:center;gap:3px;
+  min-width:0;overflow:hidden
+}
+.rec-card .rc-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  background:var(--accent-light);color:var(--accent);
+  font-size:10px;font-weight:800;padding:2px 8px;
+  border-radius:99px;width:fit-content;margin-bottom:2px;flex-shrink:0
+}
+.rec-card .rc-name{font-size:15px;font-weight:800;color:var(--text);line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.rec-card .rc-genre{font-size:11px;font-weight:700;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rec-card .rc-play{
+  margin-top:5px;flex-shrink:0;
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:11px;font-weight:800;color:var(--accent);
+  background:none;border:none;cursor:pointer;padding:0;font-family:inherit
+}
+
+/* Arrow buttons */
+.feat-arrow{width:36px;height:36px;flex-shrink:0;background:var(--surface);border:1.5px solid var(--border);border-radius:99px;color:var(--text);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:var(--sh-sm);transition:background .2s,color .2s,transform .15s;z-index:2}
+.feat-arrow:hover{background:var(--accent);color:#fff;border-color:var(--accent);transform:scale(1.08)}
+
+/* Dot indicators */
+.feat-dots{display:flex;justify-content:center;gap:6px;margin-top:10px}
+.feat-dot{width:6px;height:6px;border-radius:99px;background:var(--border);border:none;cursor:pointer;padding:0;transition:background .2s,width .25s var(--ease)}
+.feat-dot.on{background:var(--accent);width:18px}
+
+/* Progress bar */
+.feat-progress{height:2px;background:var(--accent-light);border-radius:99px;margin-top:8px;overflow:hidden}
+.feat-progress-fill{height:100%;background:var(--accent);border-radius:99px;width:0%;transition:width linear}
+
+/* Random button in All Games header */
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.sec-hdr .sec-label{margin-bottom:0}
+.rnd-btn{display:flex;align-items:center;gap:6px;height:32px;padding:0 14px;background:var(--accent-light);color:var(--accent);border:none;border-radius:99px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;transition:background .2s,color .2s}
+.rnd-btn:hover{background:var(--accent);color:#fff}
+
+/* GAME GRID */
+#gamebar{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+
+.gc{
+  aspect-ratio:4/3;
+  border-radius:var(--r);overflow:hidden;cursor:pointer;
+  position:relative;
+  box-shadow:var(--sh-sm);background:var(--surface2);
+  border:2px solid transparent;
+  transition:transform .2s var(--ease),box-shadow .2s var(--ease)
+}
+.gc:hover{transform:translateY(-5px);box-shadow:var(--sh-md)}
+.gc.fav{border-color:var(--accent)}
+
+.gc > img{
+  position:absolute;inset:0;
+  width:100%;height:100%;object-fit:cover;display:block
+}
+
+.gc > .gc-grad{
+  position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(0,0,0,.85) 0%,rgba(0,0,0,0) 58%);
+  opacity:0;transition:opacity .22s var(--ease);pointer-events:none
+}
+.gc:hover > .gc-grad{opacity:1}
+
+.gc > .gc-n{
+  position:absolute;bottom:30px;left:12px;right:44px;
+  font-size:15px;font-weight:800;color:#fff;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  opacity:0;transform:translateY(5px);transition:opacity .2s var(--ease),transform .2s var(--ease);
+  pointer-events:none
+}
+.gc:hover > .gc-n{opacity:1;transform:translateY(0)}
+
+.gc > .gc-g{
+  position:absolute;bottom:11px;left:12px;
+  font-size:11px;font-weight:700;color:rgba(255,255,255,.75);
+  opacity:0;transform:translateY(5px);transition:opacity .2s .05s var(--ease),transform .2s .05s var(--ease);
+  pointer-events:none
+}
+.gc:hover > .gc-g{opacity:1;transform:translateY(0)}
+
+.gc > .gc-fav{
+  position:absolute;top:9px;right:9px;
+  width:30px;height:30px;border-radius:99px;
+  background:rgba(0,0,0,.4);backdrop-filter:blur(4px);
+  border:none;color:#fff;font-size:16px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+  opacity:0;transition:opacity .2s,background .2s
+}
+.gc:hover > .gc-fav{opacity:1}
+.gc.fav > .gc-fav{opacity:1;background:var(--accent)}
+.gc > .gc-fav:hover{background:var(--accent)}
+
+.gc > .gc-badge{
+  position:absolute;top:9px;left:9px;
+  color:#fff;font-size:10px;font-weight:800;
+  padding:2px 9px;border-radius:99px;pointer-events:none
+}
+
+.no-res{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted);font-size:16px;font-weight:700}
+
+/* SPLASH MODAL */
+.sp-ov{position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;padding:20px}
+.sp-ov.open{display:flex}
+.sp-bg{position:absolute;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(7px)}
+.sp-modal{position:relative;z-index:1;background:var(--surface);border-radius:20px;width:100%;max-width:760px;max-height:90vh;overflow-y:auto;box-shadow:var(--sh-lg);animation:pop .22s var(--ease)}
+@keyframes pop{from{transform:scale(.95);opacity:0}to{transform:scale(1);opacity:1}}
+.sp-img{width:100%;height:230px;object-fit:cover;display:block;background:var(--surface2);border-radius:20px 20px 0 0}
+.sp-body{padding:22px 26px 28px}
+.sp-close{position:absolute;top:12px;right:12px;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);border:none;color:#fff;font-size:20px;width:32px;height:32px;border-radius:99px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s}
+.sp-close:hover{background:rgba(0,0,0,.75)}
+.sp-title{font-family:'Rajdhani',sans-serif;font-size:26px;font-weight:700;color:var(--text);margin-bottom:14px}
+.sp-meta{display:flex;gap:24px;flex-wrap:wrap;margin-bottom:12px}
+.sp-meta label{font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:3px}
+.sp-meta p{font-size:13px;font-weight:700;color:var(--text)}
+.sp-desc{font-size:14px;font-weight:600;color:var(--muted);line-height:1.65;margin-bottom:20px}
+.sp-actions{display:flex;gap:10px}
+.play-btn{flex:1;height:46px;background:var(--accent);color:#fff;border:none;border-radius:var(--r-sm);font-size:15px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;letter-spacing:.5px;box-shadow:0 4px 14px var(--accent-glow);transition:opacity .2s}
+.play-btn:hover{opacity:.88}
+.fav-btn{width:46px;height:46px;flex-shrink:0;background:var(--surface2);border:none;border-radius:var(--r-sm);color:var(--muted);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s,color .2s}
+.fav-btn:hover,.fav-btn.on{background:var(--accent);color:#fff}
+
+/* GAME PLAYER */
+#gamepage{display:none}
+.gp-banner{margin:12px 24px;border-radius:var(--r-sm);padding:11px 16px;color:#fff;font-size:13px;font-weight:700;display:none}
+.gp-banner.show{display:block}
+.gp-banner-t{font-size:14px;font-weight:800;margin-bottom:2px}
+.gp-hdr{padding:16px 24px 10px;display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.gp-title{font-family:'Rajdhani',sans-serif;font-size:28px;font-weight:700;color:var(--text)}
+.gp-desc{font-size:13px;color:var(--muted);font-weight:600;margin-top:2px}
+.gp-ow{position:relative;flex-shrink:0}
+.gp-obtn{width:38px;height:38px;background:var(--surface2);border:none;border-radius:var(--r-sm);color:var(--muted);font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s,color .2s}
+.gp-obtn:hover{background:var(--accent);color:#fff}
+
+/* IFRAME STAGE */
+.stage{margin:0 24px;border-radius:var(--r);overflow:hidden;box-shadow:var(--sh-md);position:relative;background:#000;display:flex;flex-direction:column}
+.game-iframe{display:block;width:100%;height:570px;border:none;background:#000;flex-shrink:0}
+.play-cover{position:absolute;inset:0 0 48px;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:5}
+.play-big{width:74px;height:74px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:32px;box-shadow:0 0 0 14px var(--accent-glow);transition:transform .2s}
+.play-cover:hover .play-big{transform:scale(1.08)}
+
+/* CONTROL BAR */
+.ctrl-bar{height:48px;background:var(--accent);flex-shrink:0;display:flex;align-items:center;padding:0 14px;gap:4px;position:relative}
+.ctrl-logo{font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;color:#fff;letter-spacing:3px;flex:1}
+.cbtn{width:32px;height:32px;background:rgba(255,255,255,.12);border:none;border-radius:7px;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;position:relative}
+.cbtn:hover,.cbtn.on{background:rgba(255,255,255,.3)}
+.ctrl-dd{position:absolute;bottom:calc(100% + 6px);right:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh-md);min-width:190px;overflow:hidden;display:none;z-index:9999}
+.ctrl-dd.open{display:block}
+.ctrl-dd button{display:flex;align-items:center;gap:10px;width:100%;padding:11px 16px;background:transparent;border:none;color:var(--text);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .15s}
+.ctrl-dd button:hover{background:var(--accent);color:#fff}
+.ctrl-keys{position:absolute;bottom:54px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh-md);padding:14px 18px;min-width:200px;display:none;z-index:9998}
+.ctrl-keys.open{display:block}
+.ctrl-keys h4{font-size:13px;font-weight:800;color:var(--text);margin-bottom:8px}
+.ctrl-keys p{font-size:12px;font-weight:700;color:var(--muted);white-space:pre-line;line-height:1.7}
+
+/* FULLSCREEN */
+body.fs .stage{position:fixed;inset:0;z-index:2000;margin:0;border-radius:0}
+body.fs .game-iframe{height:0;flex:1}
+body.fs #fs-exit{display:flex}
+#fs-exit{position:fixed;top:12px;left:12px;z-index:2100;width:34px;height:34px;background:rgba(0,0,0,.5);backdrop-filter:blur(6px);border:none;color:#fff;font-size:20px;border-radius:99px;cursor:pointer;display:none;align-items:center;justify-content:center;transition:background .2s}
+#fs-exit:hover{background:rgba(200,0,0,.7)}
+
+/* REPORT PANEL */
+#rp{position:fixed;inset:0;z-index:3000;background:var(--surface);overflow-y:auto;display:none}
+#rp.open{display:block}
+.rp-in{max-width:500px;margin:0 auto;padding:40px 24px}
+.rp-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px}
+.rp-title{font-family:'Rajdhani',sans-serif;font-size:28px;font-weight:700;color:var(--text)}
+.rp-close{width:36px;height:36px;background:var(--surface2);border:none;border-radius:var(--r-sm);color:var(--muted);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s,color .2s}
+.rp-close:hover{background:var(--accent);color:#fff}
+.rp form label{display:block;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--accent);margin-bottom:6px}
+.rp form input{display:block;width:100%;height:46px;background:var(--surface2);border:1.5px solid transparent;border-radius:var(--r-sm);padding:0 14px;font-size:14px;font-weight:600;color:var(--text);outline:none;font-family:inherit;margin-bottom:18px;transition:border-color .2s}
+.rp form input:focus{border-color:var(--accent)}
+.rp form input::placeholder{color:var(--muted)}
+.rp form button{height:46px;padding:0 32px;background:var(--accent);color:#fff;border:none;border-radius:var(--r-sm);font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px var(--accent-glow);transition:opacity .2s}
+.rp form button:hover{opacity:.85}
+
+/* TOASTS */
+.tw{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{background:var(--surface);color:var(--text);padding:11px 18px;border-radius:var(--r-sm);font-size:13px;font-weight:700;border-left:3px solid var(--accent);box-shadow:var(--sh-md);transform:translateX(120%);transition:transform .28s var(--ease);pointer-events:auto}
+.toast.show{transform:translateX(0)}
+
+/* GAME OF THE DAY */
+.gotd{margin:0 28px 28px;border-radius:var(--r);overflow:hidden;position:relative;cursor:pointer;box-shadow:var(--sh-lg);min-height:200px;display:flex;align-items:flex-end;transition:transform .2s var(--ease)}
+.gotd:hover{transform:translateY(-3px)}
+.gotd-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.gotd-grad{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.92) 0%,rgba(0,0,0,.3) 55%,rgba(0,0,0,0) 100%)}
+.gotd-crown{position:absolute;top:16px;left:16px;background:linear-gradient(135deg,#f59e0b,#f97316);color:#fff;font-size:11px;font-weight:800;padding:4px 12px;border-radius:99px;letter-spacing:1px;display:flex;align-items:center;gap:6px}
+.gotd-date{position:absolute;top:16px;right:16px;background:rgba(0,0,0,.45);backdrop-filter:blur(6px);color:#fff;font-size:11px;font-weight:700;padding:4px 12px;border-radius:99px}
+.gotd-body{position:relative;padding:20px 20px 20px;display:flex;align-items:flex-end;justify-content:space-between;gap:16px;width:100%}
+.gotd-info{flex:1;min-width:0}
+.gotd-name{font-family:'Rajdhani',sans-serif;font-size:28px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.1}
+.gotd-genre{font-size:12px;font-weight:700;color:rgba(255,255,255,.65);margin-top:4px}
+.gotd-desc{font-size:13px;font-weight:600;color:rgba(255,255,255,.75);margin-top:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.gotd-play{flex-shrink:0;height:44px;padding:0 22px;background:linear-gradient(135deg,#f59e0b,#f97316);color:#fff;border:none;border-radius:var(--r-sm);font-size:14px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:7px;font-family:inherit;box-shadow:0 4px 18px rgba(249,115,22,.4);transition:opacity .2s;white-space:nowrap}
+.gotd-play:hover{opacity:.88}
+
+/* FOOTER */
+.footer{padding:24px 28px;margin-top:20px;border-top:1px solid var(--border);font-size:12px;font-weight:700;color:var(--muted);text-align:center;line-height:1.8}
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="ld-logo">FUSION</div>
+  <div class="ld-bar"><div class="ld-fill"></div></div>
+</div>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="tb-logo">FUSION</div>
+  <div class="tb-search">
+    <i class="bx bx-search"></i>
+    <input type="text" id="searchbar" placeholder="Search games…" oninput="doSearch()">
+  </div>
+  <div class="tb-filter">
+    <i class="bx bx-filter"></i>
+    <select id="filterSelect"><option value="">Filter — None</option></select>
+  </div>
+  <div class="tb-right">
+    <button class="icon-btn" onclick="toggleDark()" title="Toggle theme"><i class="bx bx-moon" id="darkIcon"></i></button>
+    <div style="position:relative">
+      <button class="icon-btn" id="optsBtn" onclick="toggle('optsMenu')"><i class="bx bx-dots-horizontal-rounded"></i></button>
+      <div class="dd" id="optsMenu">
+        <button onclick="openRp('fform')"><i class="bx bx-detail"></i> Feedback</button>
+        <button onclick="openRp('brform')"><i class="bx bx-error-circle"></i> Report Bug</button>
+        <button onclick="openRp('sform')"><i class="bx bx-plus-circle"></i> Request Game</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- MAIN PAGE -->
+<section id="mainpage">
+  <div class="page-hero">
+    <h1 class="page-title">Games</h1>
+    <span class="pill" id="gamecount">0 games</span>
+    <span class="page-sub">Only play during free time or with permission.</span>
+  </div>
+
+  <!-- Game of the Day -->
+  <div class="sec-wrap" id="gotdWrap">
+    <div class="sec-label">✦ Game of the Day</div>
+    <div class="gotd" id="gotdCard">
+      <img class="gotd-img" id="gotdImg" src="" alt="">
+      <div class="gotd-grad"></div>
+      <div class="gotd-crown"><i class="bx bx-crown"></i> TODAY'S PICK</div>
+      <div class="gotd-date" id="gotdDate"></div>
+      <div class="gotd-body">
+        <div class="gotd-info">
+          <div class="gotd-name" id="gotdName"></div>
+          <div class="gotd-genre" id="gotdGenre"></div>
+          <div class="gotd-desc" id="gotdDesc"></div>
+        </div>
+        <button class="gotd-play" id="gotdBtn"><i class="bx bx-play"></i> Play Now</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Featured Carousel -->
+  <div class="sec-wrap" id="featWrap">
+    <div class="sec-label">✦ Recommended</div>
+    <div class="feat-wrap">
+      <button class="feat-arrow" id="featPrev" onclick="featNav(-1)"><i class="bx bx-chevron-left"></i></button>
+      <div class="feat-carousel" id="featCarousel"
+           onmouseenter="featPause()" onmouseleave="featResume()">
+        <div class="feat-track" id="featTrack">
+          <!-- slides injected by JS -->
+        </div>
+      </div>
+      <button class="feat-arrow" id="featNext" onclick="featNav(1)"><i class="bx bx-chevron-right"></i></button>
+    </div>
+    <div class="feat-dots" id="featDots"></div>
+    <div class="feat-progress"><div class="feat-progress-fill" id="featFill"></div></div>
+  </div>
+
+  <!-- Game grid -->
+  <div class="sec-wrap">
+    <div class="sec-hdr">
+      <div class="sec-label">✦ All Games</div>
+      <button class="rnd-btn" onclick="openRandom()"><i class="bx bx-shuffle"></i> Random</button>
+    </div>
+    <div id="gamebar"></div>
+  </div>
+
+  <footer class="footer">Copyright FUSION ©2026<br>All games belong to their respective owners.</footer>
+</section>
+
+<!-- SPLASH MODAL -->
+<div class="sp-ov" id="spOv">
+  <div class="sp-bg" onclick="closeSplash()"></div>
+  <div class="sp-modal">
+    <button class="sp-close" onclick="closeSplash()"><i class="bx bx-x"></i></button>
+    <img class="sp-img" id="spImg" src="" alt="">
+    <div class="sp-body">
+      <div class="sp-title" id="spTitle"></div>
+      <div class="sp-meta">
+        <div><label>Genre</label><p id="spGenre"></p></div>
+        <div><label>Publisher</label><p id="spPub"></p></div>
+        <div><label>Devices</label><p id="spDev"></p></div>
+      </div>
+      <div class="sp-desc" id="spDesc"></div>
+      <div class="sp-actions">
+        <button class="play-btn" id="spPlayBtn"><i class="bx bx-play"></i> PLAY NOW</button>
+        <button class="fav-btn" id="spFavBtn" onclick="toggleFavCurrent()"><i class="bx bx-heart" id="spFavIco"></i></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- GAME PLAYER -->
+<section id="gamepage">
+  <div class="gp-banner" id="gpBanner">
+    <div class="gp-banner-t" id="gpBannerT"></div>
+    <div id="gpBannerX"></div>
+  </div>
+  <div class="gp-hdr">
+    <div>
+      <div class="gp-title" id="gpTitle"></div>
+      <div class="gp-desc"  id="gpDesc"></div>
+    </div>
+    <div class="gp-ow">
+      <button class="gp-obtn" onclick="toggle('gpMenu')"><i class="bx bx-dots-horizontal-rounded"></i></button>
+      <div class="dd" id="gpMenu">
+        <button id="gpFavBtn"><i class="bx bx-heart" id="gpFavIco"></i> <span id="gpFavTxt">Favorite</span></button>
+        <button onclick="toggleFs()"><i class="bx bx-fullscreen"></i> Fullscreen</button>
+        <button onclick="openRp('brform')"><i class="bx bx-error-circle"></i> Report</button>
+        <button onclick="goBack()"><i class="bx bx-arrow-back"></i> Back</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="stage" id="stage">
+    <iframe class="game-iframe" id="iframe" src="" allowfullscreen></iframe>
+    <div class="play-cover" id="playCover" onclick="startGame()">
+      <div class="play-big"><i class="bx bx-play"></i></div>
+    </div>
+    <div class="ctrl-bar">
+      <span class="ctrl-logo">FUSION</span>
+      <div style="position:relative">
+        <button class="cbtn" onclick="toggle('ctrlDd')"><i class="bx bx-dots-vertical-rounded"></i></button>
+        <div class="ctrl-dd" id="ctrlDd">
+          <button onclick="toggleFs()"><i class="bx bx-fullscreen" id="fsIco"></i> <span id="fsTxt">Enter Fullscreen</span></button>
+          <button onclick="openRp('brform')"><i class="bx bx-error-circle"></i> Report Bug</button>
+          <button onclick="goBack()"><i class="bx bx-arrow-back"></i> Back to Games</button>
+        </div>
+      </div>
+      <button class="cbtn" id="cbFavBtn" onclick="toggleFavCurrent()"><i class="bx bx-heart" id="cbFavIco"></i></button>
+      <button class="cbtn" onclick="toggle('ctrlKeys')"><i class="bx bx-joystick-button"></i></button>
+      <button class="cbtn" onclick="goBack()"><i class="bx bx-joystick"></i></button>
+      <button class="cbtn" onclick="toggleFs()"><i class="bx bx-fullscreen" id="cbFsIco"></i></button>
+
+      <div class="ctrl-keys" id="ctrlKeys">
+        <h4>Controls</h4>
+        <p id="ctrlKeysP"></p>
+      </div>
+    </div>
+  </div>
+
+  <button id="fs-exit" onclick="exitFs()"><i class="bx bx-x"></i></button>
+  <footer class="footer">Copyright FUSION ©2026 — All games belong to their respective owners.</footer>
+</section>
+
+<!-- REPORT PANEL -->
+<div id="rp">
+  <div class="rp-in">
+    <div class="rp-hdr">
+      <div class="rp-title" id="rpTitle">Report</div>
+      <button class="rp-close" onclick="closeRp()"><i class="bx bx-x"></i></button>
+    </div>
+    <div class="rp">
+      <form id="brform" style="display:none" onsubmit="submitRp(event)">
+        <label>What are you reporting?</label><input name="issue" placeholder="e.g. Slope, a UI bug…" required>
+        <label>Describe the issue</label><input name="desc" placeholder="e.g. Shows a blank screen…" required>
+        <label>How to reproduce? (optional)</label><input name="rep" placeholder="Steps to trigger the bug…">
+        <button type="submit">Submit Report</button>
+      </form>
+      <form id="sform" style="display:none" onsubmit="submitRp(event)">
+        <label>Game or feature to request</label><input name="sug" placeholder="e.g. Stickman Hook…" required>
+        <label>Extra info? (optional)</label><input name="info" placeholder="Link, reason…">
+        <button type="submit">Submit Request</button>
+      </form>
+      <form id="fform" style="display:none" onsubmit="submitRp(event)">
+        <label>Your feedback</label><input name="fb" placeholder="e.g. Love the site…" required>
+        <label>What could improve?</label><input name="imp" placeholder="Load times, mobile…">
+        <label>Rating (1–10)</label><input name="rat" type="number" min="1" max="10" placeholder="8">
+        <button type="submit">Submit Feedback</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="tw" id="tw"></div>
+
+<script src="https://james123321.pythonanywhere.com/cdn/game_data.js"></script>
+<script src="https://james123321.pythonanywhere.com/cdn/tutorial.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
+<script>
+// ── State ──────────────────────────────────────
+let curId = null, isFull = false;
+
+// ── Boot ───────────────────────────────────────
+addEventListener("load", () => {
+  if (localStorage.dark === "false") applyDark(false);
+  else applyDark(true);
+  setTimeout(() => document.getElementById("loader").classList.add("gone"), 750);
+  document.getElementById("gamecount").textContent = data.length + " game" + (data.length !== 1 ? "s" : "");
+  buildFilter();
+  renderGrid(data);
+  setupRecs();
+  setupGotd();
+  checkHash(true);
+});
+
+// ── Filter ─────────────────────────────────────
+function buildFilter() {
+  const genres = [];
+  data.forEach(g => g.genre.split(" / ").forEach(x => { if (!genres.includes(x)) genres.push(x); }));
+  genres.sort();
+  ["- New!", "- Hot!", "- Experimental"].forEach(s => genres.unshift(s));
+  const sel = document.getElementById("filterSelect");
+  genres.forEach(g => { const o = document.createElement("option"); o.value = o.text = g; sel.add(o); });
+  sel.onchange = () => { document.getElementById("searchbar").value = ""; applyFilter(sel.value); };
+}
+function applyFilter(v) {
+  showFeat(!v);
+  if (!v) { renderGrid(data); return; }
+  const map = { "- New!": g => g.new, "- Hot!": g => g.hot, "- Experimental": g => g.experimental };
+  renderGrid(map[v] ? data.filter(map[v]) : data.filter(g => g.genre.includes(v)));
+}
+function showFeat(on) {
+  document.getElementById("featWrap").style.display = on ? "" : "none";
+  document.getElementById("gotdWrap").style.display = on ? "" : "none";
+}
+
+// ── Search ─────────────────────────────────────
+function doSearch() {
+  const q = document.getElementById("searchbar").value.trim();
+  document.getElementById("filterSelect").value = "";
+  showFeat(!q);
+  if (!q) { renderGrid(data); return; }
+  renderGrid(new Fuse(data, { keys: ["name","genre","publisher"], threshold: 0.4 }).search(q).map(r => r.item));
+}
+
+// ── Render Grid ────────────────────────────────
+function renderGrid(games) {
+  const bar = document.getElementById("gamebar");
+  bar.innerHTML = "";
+  if (!games.length) { bar.innerHTML = '<div class="no-res">No games found.</div>'; return; }
+
+  const favs = getFavs();
+  const sorted = [...games.filter(g => favs.includes(g.id)), ...games.filter(g => !favs.includes(g.id))];
+
+  sorted.forEach(game => {
+    const card = document.createElement("div");
+    card.className = "gc" + (favs.includes(game.id) ? " fav" : "");
+    card.onclick = () => openSplash(game.id);
+
+    const img = document.createElement("img");
+    img.src = game.img;
+    img.alt = game.name;
+    img.onerror = () => { img.style.display = "none"; card.style.background = "linear-gradient(135deg,var(--accent-light),var(--surface2))"; };
+    card.appendChild(img);
+
+    const grad = document.createElement("div");
+    grad.className = "gc-grad";
+    card.appendChild(grad);
+
+    const bc = game.soon ? ["Coming Soon","#22c55e"] : game.hot ? ["🔥 Hot","#ef4444"] : game.experimental ? ["Exp","#f97316"] : game.updated ? ["Updated","#3b82f6"] : game.new ? ["New","#695CFE"] : null;
+    if (bc) {
+      const b = document.createElement("span");
+      b.className = "gc-badge"; b.textContent = bc[0]; b.style.background = bc[1];
+      card.appendChild(b);
+    }
+
+    const fb = document.createElement("button");
+    fb.className = "gc-fav" + (favs.includes(game.id) ? " on" : "");
+    fb.innerHTML = `<i class="bx ${favs.includes(game.id) ? "bxs-heart" : "bx-heart"}"></i>`;
+    fb.onclick = e => { e.stopPropagation(); toggleFav(game.id); };
+    card.appendChild(fb);
+
+    const nm = document.createElement("div");
+    nm.className = "gc-n"; nm.textContent = game.name;
+    card.appendChild(nm);
+
+    const gn = document.createElement("div");
+    gn.className = "gc-g"; gn.textContent = game.genre.split(" / ")[0];
+    card.appendChild(gn);
+
+    bar.appendChild(card);
+  });
+}
+
+// ── Recommended Carousel ───────────────────────
+const REC = 8;
+const FEAT_INTERVAL = 4000;
+let featSlides = [], featIdx = 0, featTimer = null;
+
+function setupRecs() {
+  const n = Math.min(REC, data.length);
+  const picks = [], used = new Set();
+  while (picks.length < n) {
+    const i = Math.floor(Math.random() * data.length);
+    if (!used.has(i)) { used.add(i); picks.push(data[i]); }
+  }
+
+  const track = document.getElementById("featTrack");
+  const dots  = document.getElementById("featDots");
+  track.innerHTML = "";
+  dots.innerHTML  = "";
+  featSlides = [];
+
+  picks.forEach(g => {
+    const slide = document.createElement("div");
+    slide.className = "feat-slide";
+    slide.innerHTML = `
+      <div class="rec-card" onclick="openSplash('${g.id}')">
+        <div class="rc-thumb"><img src="${g.img}" alt="${g.name}" onerror="this.style.display='none'"></div>
+        <div class="rc-body">
+          <span class="rc-badge"><i class="bx bx-star"></i> Recommended</span>
+          <div class="rc-name">${g.name}</div>
+          <div class="rc-genre">${g.genre.replaceAll(" / ", " · ")}</div>
+          <button class="rc-play" onclick="event.stopPropagation();closeSplash();playGame('${g.id}')">
+            <i class="bx bx-play-circle"></i> Play Now
+          </button>
+        </div>
+      </div>`;
+    track.appendChild(slide);
+    featSlides.push(g.id);
+  });
+
+  // Dots
+  featSlides.forEach((_, i) => {
+    const d = document.createElement("button");
+    d.className = "feat-dot" + (i === 0 ? " on" : "");
+    d.onclick = () => { featGoTo(i); featRestart(); };
+    dots.appendChild(d);
+  });
+
+  featGoTo(0, false);
+  featResume();
+}
+
+function featGoTo(idx, animate = true) {
+  featIdx = (idx + featSlides.length) % featSlides.length;
+  const track = document.getElementById("featTrack");
+  if (!animate) track.style.transition = "none";
+  track.style.transform = `translateX(-${featIdx * 100}%)`;
+  if (!animate) requestAnimationFrame(() => track.style.transition = "");
+  document.querySelectorAll(".feat-dot").forEach((d, i) => d.classList.toggle("on", i === featIdx));
+  featRestartFill();
+}
+
+function featNav(dir) { featGoTo(featIdx + dir); featRestart(); }
+
+function featRestart() {
+  clearInterval(featTimer);
+  featTimer = setInterval(() => featGoTo(featIdx + 1), FEAT_INTERVAL);
+  featRestartFill();
+}
+
+function featPause() {
+  clearInterval(featTimer);
+  const fill = document.getElementById("featFill");
+  if (fill) { fill.style.transition = "none"; fill.style.width = fill.style.width; }
+}
+
+function featResume() { featRestart(); }
+
+function featRestartFill() {
+  const fill = document.getElementById("featFill");
+  if (!fill) return;
+  fill.style.transition = "none";
+  fill.style.width = "0%";
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    fill.style.transition = `width ${FEAT_INTERVAL}ms linear`;
+    fill.style.width = "100%";
+  }));
+}
+function openRandom() { openSplash(data[Math.floor(Math.random() * data.length)].id); }
+
+// ── Game of the Day ────────────────────────────
+function setupGotd() {
+  if (!data.length) return;
+
+  const today = new Date();
+  const seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+  const idx = seed % data.length;
+  const g = data[idx];
+
+  document.getElementById("gotdImg").src = g.img;
+  document.getElementById("gotdImg").onerror = () => {
+    document.getElementById("gotdImg").style.display = "none";
+    document.getElementById("gotdCard").style.background = "linear-gradient(135deg,var(--accent),#9b8afb)";
+  };
+  document.getElementById("gotdName").textContent  = g.name;
+  document.getElementById("gotdGenre").textContent = g.genre.replaceAll(" / ", " · ");
+  document.getElementById("gotdDesc").textContent  = g.description;
+  document.getElementById("gotdDate").textContent  = today.toLocaleDateString("en-US", { month:"short", day:"numeric", year:"numeric" });
+
+  document.getElementById("gotdCard").onclick = () => openSplash(g.id);
+  document.getElementById("gotdBtn").onclick  = e => { e.stopPropagation(); closeSplash(); playGame(g.id); };
+}
+
+// ── Splash ─────────────────────────────────────
+function openSplash(id) {
+  const g = data.find(x => x.id === id); if (!g) return;
+  curId = id;
+  document.getElementById("spImg").src = g.img;
+  document.getElementById("spTitle").textContent = g.name;
+  document.getElementById("spDesc").textContent  = g.description;
+  document.getElementById("spGenre").textContent = g.genre.replaceAll(" / ", ", ");
+  document.getElementById("spPub").textContent   = g.publisher;
+  document.getElementById("spDev").textContent   = g.devices || "Computer";
+  document.getElementById("spPlayBtn").onclick   = () => { closeSplash(); playGame(id); };
+  const f = getFavs().includes(id);
+  document.getElementById("spFavIco").className = f ? "bx bxs-heart" : "bx bx-heart";
+  document.getElementById("spFavBtn").classList.toggle("on", f);
+  document.getElementById("spOv").classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+function closeSplash() { document.getElementById("spOv").classList.remove("open"); document.body.style.overflow = ""; }
+
+// ── Play ───────────────────────────────────────
+function playGame(id, fromHash) {
+  const g = data.find(x => x.id === id); if (!g) return;
+  curId = id;
+  document.getElementById("mainpage").style.display = "none";
+  document.getElementById("gamepage").style.display = "block";
+  document.getElementById("gpTitle").textContent = g.name;
+  document.getElementById("gpDesc").textContent  = g.description;
+  document.getElementById("ctrlKeysP").textContent = (g.controls || []).filter(Boolean).join("\n") || "No controls listed.";
+  document.getElementById("iframe").src = "";
+  document.getElementById("playCover").style.display = "flex";
+  if (!fromHash) startGame();
+
+  // Banner
+  const b = document.getElementById("gpBanner"), t = document.getElementById("gpBannerT"), x = document.getElementById("gpBannerX");
+  b.className = "gp-banner";
+  if      (g.broken)       { b.classList.add("show"); b.style.background="#ef4444"; t.textContent="⚠ This game may have issues.";   x.textContent="Error: "+(g.note||"Unknown"); }
+  else if (g.blocked)      { b.classList.add("show"); b.style.background="#eab308"; t.textContent="⚠ This game may be blocked.";    x.textContent="May not work on your network."; }
+  else if (g.experimental) { b.classList.add("show"); b.style.background="#f97316"; t.textContent="🧪 Experimental.";               x.textContent="Feedback welcome!"; }
+  else if (g.soon)         { b.classList.add("show"); b.style.background="#22c55e"; t.textContent="⏳ Coming Soon.";                 x.textContent=""; }
+
+  syncFavUI(id);
+  window.location.hash = "#" + id;
+  window.scrollTo(0, 0);
+  document.body.style.overflow = "visible";
+}
+
+// ── Raw-code hosts: fetch HTML and inject via srcdoc ──────────────────────────
+const RAW_HOSTS = [
+  "cdn.jsdelivr.net",
+  "raw.githubusercontent.com",
+  "rawcdn.githack.com",
+  "cdn.statically.io",
+  "gitcdn.xyz",
+  "raw.gitcdn.io",
+  "combinatronics.io",
+];
+
+function isRawHost(url) {
+  try { const h = new URL(url).hostname; return RAW_HOSTS.some(r => h === r || h.endsWith("." + r)); }
+  catch { return false; }
+}
+
+// ── Start Game ────────────────────────────────────────────────────────────────
+async function startGame() {
+  const g = data.find(x => x.id === curId); if (!g) return;
+  const iframe = document.getElementById("iframe");
+  const cover  = document.getElementById("playCover");
+
+  if (isRawHost(g.link)) {
+    fetch(g.link)
+      .then(r => r.text())
+      .then(html => {
+        iframe.srcdoc = html;
+        cover.style.display = "none";
+      })
+      .catch(err => {
+        console.error("Failed to load game:", err);
+        iframe.src = g.link;
+        cover.style.display = "none";
+        toast("⚠️ Failed to fetch game source.");
+      });
+  } else {
+    iframe.removeAttribute("srcdoc");
+    iframe.src = g.link;
+    cover.style.display = "none";
+  }
+}
+
+function goBack() {
+  exitFs();
+  document.getElementById("gamepage").style.display = "none";
+  document.getElementById("mainpage").style.display = "block";
+  const iframe = document.getElementById("iframe");
+  iframe.removeAttribute("srcdoc");
+  iframe.src = "";
+  curId = null;
+  history.pushState("", document.title, location.pathname);
+  window.scrollTo(0, 0);
+}
+
+// ── Fullscreen ─────────────────────────────────
+function toggleFs() { isFull ? exitFs() : enterFs(); close("ctrlDd"); close("gpMenu"); }
+function enterFs() {
+  isFull = true;
+  document.body.classList.add("fs");
+  document.body.style.overflow = "hidden";
+  setFsUI(true);
+  const s = document.getElementById("stage");
+  if (s.requestFullscreen) s.requestFullscreen().catch(() => {});
+}
+function exitFs() {
+  if (!isFull) return;
+  isFull = false;
+  document.body.classList.remove("fs");
+  document.body.style.overflow = "";
+  setFsUI(false);
+  if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+}
+function setFsUI(on) {
+  const ic = on ? "bx bx-exit-fullscreen" : "bx bx-fullscreen";
+  document.getElementById("cbFsIco").className = ic;
+  document.getElementById("fsIco").className   = ic;
+  document.getElementById("fsTxt").textContent = on ? "Exit Fullscreen" : "Enter Fullscreen";
+  document.getElementById("fs-exit").style.display = on ? "flex" : "none";
+}
+document.addEventListener("fullscreenchange", () => { if (!document.fullscreenElement && isFull) exitFs(); });
+
+// ── Favs ───────────────────────────────────────
+function getFavs() { const r = localStorage.favorites; return r ? r.split(",").map(s => s.trim()).filter(Boolean) : []; }
+function saveFavs(a) { localStorage.favorites = a.join(","); }
+function toggleFav(id) {
+  let f = getFavs();
+  if (f.includes(id)) { f = f.filter(x => x !== id); toast("🤍 Removed from favorites"); }
+  else { f.push(id); toast("❤️ Added to favorites!"); }
+  saveFavs(f);
+  renderGrid(data);
+  if (curId === id) syncFavUI(id);
+}
+function toggleFavCurrent() { if (curId) toggleFav(curId); }
+function syncFavUI(id) {
+  const f = getFavs().includes(id);
+  ["spFavIco","gpFavIco","cbFavIco"].forEach(x => { const el = document.getElementById(x); if (el) el.className = f ? "bx bxs-heart" : "bx bx-heart"; });
+  const sb = document.getElementById("spFavBtn"); if (sb) sb.classList.toggle("on", f);
+  const cb = document.getElementById("cbFavBtn"); if (cb) cb.classList.toggle("on", f);
+  const gt = document.getElementById("gpFavTxt"); if (gt) gt.textContent = f ? "Unfavorite" : "Favorite";
+  const gb = document.getElementById("gpFavBtn"); if (gb) gb.onclick = () => toggleFavCurrent();
+}
+
+// ── Hash ───────────────────────────────────────
+addEventListener("hashchange", () => checkHash(false));
+function checkHash(onLoad) {
+  const h = location.hash; if (!h || h === "#") return;
+  const g = data.find(x => x.id === h.slice(1)); if (g) playGame(g.id, onLoad);
+}
+
+// ── Dark mode ──────────────────────────────────
+function applyDark(on) { document.body.classList.toggle("dark", on); document.getElementById("darkIcon").className = on ? "bx bx-sun" : "bx bx-moon"; }
+function toggleDark() { const d = document.body.classList.contains("dark"); applyDark(!d); localStorage.dark = !d; }
+
+// ── Dropdowns ──────────────────────────────────
+function toggle(id) { document.getElementById(id).classList.toggle("open"); }
+function close(id)  { document.getElementById(id).classList.remove("open"); }
+
+document.addEventListener("click", e => {
+  if (!e.target.closest("#optsBtn") && !e.target.closest("#optsMenu")) close("optsMenu");
+  if (!e.target.closest(".gp-ow"))  close("gpMenu");
+  if (!e.target.closest(".cbtn"))   { close("ctrlDd"); close("ctrlKeys"); }
+});
+
+// ── Report ─────────────────────────────────────
+function openRp(f) {
+  close("optsMenu"); close("gpMenu");
+  document.getElementById("rp").classList.add("open");
+  ["brform","sform","fform"].forEach(id => document.getElementById(id).style.display = id === f ? "block" : "none");
+  document.getElementById("rpTitle").textContent = { brform:"Bug Report", sform:"Request a Game", fform:"Feedback" }[f] || "Report";
+}
+function closeRp() { document.getElementById("rp").classList.remove("open"); }
+function submitRp(e) { e.preventDefault(); closeRp(); toast("✅ Submitted! Thanks."); }
+
+// ── Toast ──────────────────────────────────────
+function toast(msg) {
+  const el = document.createElement("div"); el.className = "toast"; el.textContent = msg;
+  document.getElementById("tw").appendChild(el);
+  requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add("show")));
+  setTimeout(() => { el.classList.remove("show"); setTimeout(() => el.remove(), 300); }, 2800);
+}
+
+// ── Keyboard ───────────────────────────────────
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") {
+    if (isFull) { exitFs(); return; }
+    if (document.getElementById("rp").classList.contains("open")) { closeRp(); return; }
+    if (document.getElementById("spOv").classList.contains("open")) { closeSplash(); return; }
+  }
+  if (e.key === "Enter" && document.getElementById("spOv").classList.contains("open"))
+    document.getElementById("spPlayBtn").click();
+});
+
+// stubs
+function sendSiteData(){}
+function trackGameData(){}
+function resizeWidth(){}
+</script>
+
+</body>
+</html>

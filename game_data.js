@@ -20,19 +20,7 @@ let gitcdnUrl = "https://cdnfs.sumibi.org"
 const data = [
  
 
-{
-    name: "Midnight Shift",
-    id: "midnightshift",
-    genre: "Horror",
-    description: "A fast-paced, cartoon-style action-adventure game with hectic platforming and hilarious boss battles",
-    link: "https://apifs.global.ssl.fastly.net/web/midnightshift.html",
-    img: `https://cdn.jsdelivr.net/gh/james222323/game-api@main/Art/midnightshift.jpg`,
-    publisher: "Phantom GD",
-    controls: [
-        "Navigate - Mouse / Trackpad Select - LMB",
-    ],
-    new: true
-},
+
 {
     name: "Midnight Shift",
     id: "midnightshift",
@@ -2986,5 +2974,6 @@ const data = [
     //     ]
     // },
 ]
+
 
 
